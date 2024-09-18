@@ -1,0 +1,95 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_LENGTH 1000
+#define MAX_NAMES 1000
+
+void readNames(char names[][MAX_LENGTH], int* count, char* prompt) {
+    int wordCount = 0;
+    printf("%s", prompt);
+
+    while (1) {
+        char line[MAX_LENGTH];
+        printf("Enter a line (or 'exit' to stop): ");
+        if (fgets(line, MAX_LENGTH, stdin) == NULL) {
+            break;
+        }
+
+        // Remove the newline character at the end of the line
+        line[strcspn(line, "\n")] = 0;
+
+        if (strcmp(line, "exit") == 0) {
+            break;
+        }
+
+        char* word = strtok(line, " ");
+        while (word != NULL) {
+            if (wordCount < MAX_NAMES) {
+                strcpy(names[wordCount], word);
+                printf("a[%d] = %s\n", wordCount, names[wordCount]);
+                wordCount++;
+            } else {
+                printf("Maximum number of names reached. Stopping input.\n");
+                break;
+            }
+            word = strtok(NULL, " ");
+        }
+
+        if (wordCount >= MAX_NAMES) {
+            break;
+        }
+    }
+
+    if (wordCount == 0) {
+        printf("No names found.\n");
+    } else {
+        printf("\nYou entered %d names:\n", wordCount);
+        for (int j = 0; j < wordCount; j++) {
+            printf("a[%d] = %s\n", j, names[j]);
+        }
+    }
+
+    *count = wordCount;
+}
+
+int main() {
+    char followers[MAX_NAMES][MAX_LENGTH];
+    int followerCount;
+    readNames(followers, &followerCount, "Enter followers (one line at a time):\n");
+
+    char following[MAX_NAMES][MAX_LENGTH];
+    int followingCount;
+    readNames(following, &followingCount, "Enter following (one line at a time):\n");
+
+    printf("\nChecking for unfollowed...\n");
+
+    int numUnfollowed = 0;
+    char unfollowed[MAX_NAMES][MAX_LENGTH];
+
+    for (int i = 0; i < followingCount; i++) {
+        int found = 0;
+        for (int j = 0; j < followerCount; j++) {
+            if (strcmp(following[i], followers[j]) == 0) {
+                found = 1;
+                break;
+            }
+        }
+        if (!found) {
+            strcpy(unfollowed[numUnfollowed], following[i]);
+            numUnfollowed++;
+        }
+    }
+
+    // Display unfollowed
+    if (numUnfollowed > 0) {
+        printf("\nUnfollowed:\n");
+        for (int i = 0; i < numUnfollowed; i++) {
+            printf("%s\n", unfollowed[i]);
+        }
+    } else {
+        printf("\nNo unfollowed users.\n");
+    }
+
+    return 0;
+}
